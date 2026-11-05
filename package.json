@@ -1,0 +1,55 @@
+{
+  "name": "inmofollow-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SaaS inmobiliario con copiloto comercial de inteligencia artificial",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "nodemon src/backend/src/server.ts",
+    "dev:frontend": "vite",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "tsc -p src/backend",
+    "build:frontend": "tsc -b && vite build",
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "vitest run",
+    "db:push": "supabase db push"
+  },
+  "workspaces": [
+    "src/backend",
+    "src/frontend",
+    "src/shared"
+  ],
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "zod": "^3.23.8",
+    "jsonwebtoken": "^9.0.2",
+    "@supabase/supabase-js": "^2.47.10",
+    "stripe": "^17.4.0",
+    "openai": "^4.73.0",
+    "winston": "^3.13.0",
+    "pg": "^8.11.5",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "ts-node": "^10.9.2",
+    "nodemon": "^3.1.4",
+    "vite": "^5.4.8",
+    "@vitejs/plugin-react": "^4.3.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@types/react": "^18.3.3",
+    "@types/node": "^20.14.10",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/stripe": "^3.2.2",
+    "@types/uuid": "^10.0.0",
+    "vitest": "^2.0.5",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/jest-dom": "^6.4.2",
+    "jsdom": "^25.0.1"
+  }
+}
