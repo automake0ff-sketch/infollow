@@ -34,6 +34,8 @@ export default async function LeadPage({
     supabase.from("tasks").select("id, lead_id, title, due_at").eq("lead_id", id).eq("status", "pendiente").order("due_at"),
   ]);
 
+  const { data: prio } = await supabase.from("v_lead_priority").select("score, level, reasons").eq("lead_id", id).maybeSingle();
+  const prioReasons = (prio?.reasons ?? []) as { rule: string; reason: string }[];
   const stageLabel = Object.fromEntries((stages ?? []).map((s) => [s.key, s.label]));
   const propMap = new Map((props ?? []).map((p) => [p.id, p]));
   const linkedIds = new Set((links ?? []).map((l) => l.property_id));
@@ -139,6 +141,15 @@ export default async function LeadPage({
       </div>
 
       <aside className="space-y-6">
+        {prioReasons.length > 0 && (
+          <section className="rounded-xl border bg-white p-4">
+            <h2 className="mb-2 font-semibold">Por qué necesita atención</h2>
+            <p className="mb-2 text-xs text-neutral-500">Prioridad {prio?.level} ({prio?.score} puntos). Es una prioridad de atención, no una probabilidad de cierre.</p>
+            <ul className="list-disc space-y-1 pl-5 text-sm">
+              {prioReasons.map((r) => <li key={r.rule}>{r.reason}</li>)}
+            </ul>
+          </section>
+        )}
         <section className="rounded-xl border bg-white p-4">
           <h2 className="mb-3 font-semibold">Propiedades relacionadas</h2>
           {linked.length === 0 ? (

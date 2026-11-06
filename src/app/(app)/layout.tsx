@@ -12,9 +12,11 @@ async function logout() {
 
 const NAV = [
   { href: "/hoy", label: "Hoy" },
+  { href: "/atencion", label: "Atención" },
   { href: "/leads", label: "Leads" },
   { href: "/pipeline", label: "Pipeline" },
   { href: "/propiedades", label: "Propiedades" },
+  { href: "/ajustes", label: "Ajustes" },
 ];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {

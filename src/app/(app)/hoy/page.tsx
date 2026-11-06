@@ -2,7 +2,8 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { fmtDate } from "@/lib/form";
 import TaskRow, { type TaskItem } from "../tareas/TaskRow";
-import { createTaskInDays } from "../tareas/actions";
+import QuickTask from "../tareas/QuickTask";
+import PriorityList, { type PriorityItem } from "../tareas/PriorityList";
 
 const box = "divide-y rounded-xl border bg-white";
 
@@ -13,23 +14,6 @@ function Section({ title, hint, count, children }: { title: string; hint?: strin
       {hint && <p className="mb-2 text-xs text-neutral-500">{hint}</p>}
       {children}
     </section>
-  );
-}
-
-function QuickTask({ leadId }: { leadId: string }) {
-  return (
-    <form action={createTaskInDays} className="flex flex-wrap items-center gap-1">
-      <input type="hidden" name="lead_id" value={leadId} />
-      <input type="hidden" name="back" value="/hoy" />
-      <input name="title" defaultValue="Hacer seguimiento" maxLength={200} className="w-40 rounded-lg border p-1.5 text-xs" aria-label="Título del seguimiento" />
-      <select name="days" defaultValue="1" className="rounded-lg border p-1.5 text-xs" aria-label="Cuándo">
-        <option value="0">Hoy</option>
-        <option value="1">Mañana</option>
-        <option value="3">En 3 días</option>
-        <option value="7">En 1 semana</option>
-      </select>
-      <button className="rounded-lg bg-black px-2.5 py-1.5 text-xs text-white">Crear seguimiento</button>
-    </form>
   );
 }
 
@@ -44,24 +28,27 @@ export default async function HoyPage({ searchParams }: { searchParams: Promise<
   }
 
   const pending = () => supabase.from("tasks").select("id, lead_id, title, due_at").eq("status", "pendiente");
-  const [overdue, today, upcoming, noNext, inactive, settings] = await Promise.all([
+  const [overdue, today, upcoming, noNext, inactive, settings, prio] = await Promise.all([
     pending().lt("due_at", bounds.day_start).order("due_at").limit(50),
     pending().gte("due_at", bounds.day_start).lt("due_at", bounds.day_end).order("due_at").limit(50),
     pending().gte("due_at", bounds.day_end).order("due_at").limit(10),
     supabase.from("v_leads_without_next_step").select("id, full_name, stage_key, created_at").order("created_at", { ascending: false }).limit(20),
     supabase.from("v_inactive_leads").select("id, full_name, stage_key, days_inactive, last_interaction_at").order("days_inactive", { ascending: false }).limit(20),
     supabase.from("agency_settings").select("inactivity_days").maybeSingle(),
+    supabase.from("v_lead_priority").select("lead_id, score, level, reasons").order("score", { ascending: false }).limit(8),
   ]);
 
   const tasks: TaskItem[] = [...(overdue.data ?? []), ...(today.data ?? []), ...(upcoming.data ?? [])];
-  const leadIds = [...new Set(tasks.map((t) => t.lead_id))];
-  const { data: leadRows } = leadIds.length ? await supabase.from("leads").select("id, full_name").in("id", leadIds) : { data: [] as { id: string; full_name: string }[] };
+  const prioItems = (prio.data ?? []) as PriorityItem[];
+  const leadIds = [...new Set([...tasks.map((t) => t.lead_id), ...prioItems.map((p) => p.lead_id)])];
+  const { data: leadRows } = leadIds.length ? await supabase.from("leads").select("id, full_name, stage_key").in("id", leadIds) : { data: [] as { id: string; full_name: string; stage_key: string }[] };
   const names = Object.fromEntries((leadRows ?? []).map((l) => [l.id, l.full_name]));
   const { data: stages } = await supabase.from("pipeline_stages").select("key,label");
   const stageLabel = Object.fromEntries((stages ?? []).map((s) => [s.key, s.label]));
+  const prioNames = Object.fromEntries((leadRows ?? []).map((l) => [l.id, { full_name: l.full_name, stage: stageLabel[l.stage_key] ?? l.stage_key }]));
 
   const o = overdue.data ?? [], t = today.data ?? [], u = upcoming.data ?? [], n = noNext.data ?? [], i = inactive.data ?? [];
-  const nothingAtAll = o.length + t.length + u.length + n.length + i.length === 0;
+  const nothingAtAll = o.length + t.length + u.length + n.length + i.length + prioItems.length === 0;
   const days = settings.data?.inactivity_days ?? 7;
 
   return (
@@ -85,6 +72,13 @@ export default async function HoyPage({ searchParams }: { searchParams: Promise<
         </section>
       )}
 
+      {prioItems.length > 0 && (
+        <Section title="A quién atender primero" hint="Ordenado por prioridad de atención según reglas claras; no es una probabilidad de cierre. Cada alerta explica su motivo." count={prioItems.length}>
+          <PriorityList items={prioItems} names={prioNames} back="/hoy" />
+          <Link href="/atencion" className="mt-2 inline-block text-sm underline">Ver todas las oportunidades que necesitan atención</Link>
+        </Section>
+      )}
+
       {o.length > 0 && (
         <Section title="Seguimientos vencidos" hint="Tenían fecha anterior a hoy y siguen pendientes." count={o.length}>
           <ul className={box}>{o.map((x) => <TaskRow key={x.id} task={x} leadName={names[x.lead_id]} back="/hoy" />)}</ul>
@@ -106,7 +100,7 @@ export default async function HoyPage({ searchParams }: { searchParams: Promise<
                   <Link href={`/leads/${l.id}`} className="truncate text-sm font-medium underline">{l.full_name}</Link>
                   <p className="text-xs text-neutral-500">{stageLabel[l.stage_key] ?? l.stage_key} · creado {fmtDate(l.created_at)}</p>
                 </div>
-                <QuickTask leadId={l.id} />
+                <QuickTask leadId={l.id} back="/hoy" />
               </li>
             ))}
           </ul>
@@ -138,7 +132,7 @@ export default async function HoyPage({ searchParams }: { searchParams: Promise<
         </Section>
       )}
 
-      <p className="text-xs text-neutral-500">Las visitas pendientes de seguimiento y la priorización explicada llegan en las Etapas 4 y 6.</p>
+      <p className="text-xs text-neutral-500">Las visitas pendientes de seguimiento llegan con la Etapa 6.</p>
     </main>
   );
 }

@@ -13,11 +13,11 @@ export function num(f: FormData, name: string): number | null {
 }
 
 export function fmtDate(iso: string | null | undefined) {
-  return iso ? new Date(iso).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+  return iso ? new Date(iso).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric", timeZone: "Europe/Madrid" }) : "—";
 }
 
 export function fmtDateTime(iso: string) {
-  return new Date(iso).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Madrid" });
 }
 
 export function fmtMoney(n: number | string | null | undefined) {

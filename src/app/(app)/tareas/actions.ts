@@ -8,7 +8,7 @@ import { uuid } from "@/lib/schemas";
 /** Solo se permite volver a /hoy o a una ficha de lead (evita open redirect). */
 function safeBack(f: FormData) {
   const b = String(f.get("back") ?? "");
-  return b === "/hoy" || /^\/leads\/[0-9a-f-]{36}$/.test(b) ? b : "/hoy";
+  return b === "/hoy" || b === "/atencion" || /^\/leads\/[0-9a-f-]{36}$/.test(b) ? b : "/hoy";
 }
 
 function done(back: string, error?: string): never {

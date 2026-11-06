@@ -64,7 +64,6 @@ returns void language sql security definer set search_path = public as $$
     (p_agency, 'negociacion',      'Negociación',      6, true),
     (p_agency, 'cerrado',          'Cerrado',          7, false),
     (p_agency, 'no_interesado',    'No interesado',    8, false)
-  on conflict do nothing
 $$;
 revoke execute on function public.seed_pipeline_stages(uuid) from public, anon, authenticated;
 
