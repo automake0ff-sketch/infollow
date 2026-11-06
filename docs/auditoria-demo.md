@@ -1,37 +1,30 @@
-# Auditoría y preparación para demo (6 nov 2026)
+# Auditoría y preparación para demo (actualizada tras importación, legal e IA)
 
 ## Veredicto
-**Listo para demos privadas y acompañadas con datos propios del agente, una vez ejecutadas las migraciones en un Supabase real y comprobado el flujo en navegador. No listo para ofrecerlo al mercado de forma abierta.**
+**Listo para demos privadas y acompañadas con datos propios del agente, una vez ejecutadas las migraciones en un Supabase real, configurada la clave de OpenRouter y comprobado el flujo en navegador. Todavía no para vender abiertamente.**
 
 ## Verificado de verdad
-- `npm run build` y `npm run lint`: sin errores.
-- 4 migraciones y 4 tests SQL (aislamiento entre agencias, CRM, seguimientos, priorización) ejecutados en PostgreSQL 16 local con `auth` emulado. Esto destapó un fallo que habría impedido todo registro (`ON CONFLICT` con restricción diferible), ya corregido.
-- Auditoría de permisos: un agente no puede cambiar ajustes, renombrar la agencia, borrar etapas, cambiar su agencia ni ejecutar la función interna de alta; `anon` no ve datos.
-- Servidor en ejecución: rutas públicas 200, rutas privadas redirigen a `/login`, cabeceras de seguridad presentes.
-- Dependencias de producción: 0 vulnerabilidades (`npm audit --omit=dev`). Las 8 moderadas son de herramientas de desarrollo (eslint).
-- Sin secretos en el repositorio.
+- `npm run build`, `npm run lint`, `tsc` y 27 tests de aplicación (importación, plantillas, cliente de IA, minimización de datos, prompts).
+- 6 migraciones y 5 tests SQL en PostgreSQL 16 local con `auth` emulado: aislamiento entre agencias, CRM, seguimientos, priorización, términos obligatorios, límites de IA por agencia y globales, borrado de agencia, permisos por rol.
+- Fallos reales encontrados y corregidos al probar: (1) el alta de usuarios fallaba por un `ON CONFLICT`; (2) **el propietario podía subirse su propio cupo de IA** (ahora solo puede editar las columnas permitidas); (3) importes con separador de miles ("250.000 €") se leían como 250 en la salida de la IA.
+- Servidor en marcha: páginas legales públicas; `/importar`, `/analizador`, `/api/export` y plantillas exigen sesión.
+- Privacidad en IA: solo nombre de pila, sin teléfono/email/apellidos; teléfonos y emails en texto libre se ocultan; `data_collection: deny` por defecto; las conversaciones pegadas no se guardan.
 
 ## NO verificado
-- Ejecución contra un Supabase real (auth real, PostgREST, correos de confirmación).
-- Uso en navegador y en móvil. Nadie ha visto aún las pantallas.
-- Rendimiento con volumen de datos.
+- Ejecución contra un Supabase real (auth, PostgREST, correos).
+- Llamadas reales a OpenRouter: desde este entorno no hay acceso a su API. El cliente se probó con respuestas simuladas; la calidad real de los modelos gratuitos y su disponibilidad con `data_collection: deny` hay que comprobarlas con tu clave.
+- La importación completa a través de la interfaz (se probó el análisis, mapeo y validación; la inserción por lotes contra Supabase real no).
+- Uso en navegador y móvil. Rendimiento con volumen.
 
-## Bloqueadores para mostrarlo al mercado
-1. **Sin IA.** La propuesta ("asistente comercial con IA") aún no existe: hoy es CRM + seguimiento + priorización por reglas. Hay que decidirlo: construir la Etapa 5 o vender explícitamente lo que hay.
-2. **Sin importación de contactos.** Un agente no va a teclear su cartera en una demo. Una importación CSV es probablemente lo que más condiciona que cargue datos reales.
-3. **RGPD incompleto.** Faltan política de privacidad, términos, exportación y borrado de datos. Se guardan datos personales de terceros.
-4. **Sin prueba gratuita ni cobro.** No se puede cerrar una venta (Etapa 7).
-5. **Correo de Supabase por defecto**: límite muy bajo; configurar SMTP propio antes de demos con varios registros.
-
-## Huecos funcionales (no bloquean una demo guiada)
-- No se puede eliminar un lead ni una propiedad; no se editan ni cancelan seguimientos (solo completar o posponer).
-- No hay invitaciones: el modelo admite varios usuarios por agencia, pero la interfaz no permite añadirlos.
-- Sin visitas (Etapa 6): falta la regla "visita sin seguimiento".
-- Listados limitados a 100 elementos, sin paginación.
-- Sin límite de registros ni captcha en el alta.
-- Las reglas de priorización usan las claves de las 8 etapas iniciales; una etapa nueva creada por el propietario no tiene reglas propias.
+## Riesgos y bloqueadores restantes
+1. **Capacidad de la IA gratuita**: 50 peticiones/día en toda la cuenta de OpenRouter (1.000 con ≥ 10 $ de créditos comprados una vez). Sirve para demos ligeras, no para una base de clientes. Cambiar a un modelo de pago es solo configuración.
+2. **Calidad de la IA gratuita**: modelos que rotan y pueden degradar o desaparecer sin aviso; la salida estructurada del analizador puede fallar más a menudo (en ese caso no consume cupo).
+3. **Textos legales sin revisar**: son un modelo con campos `[PENDIENTE]` (titular, región de alojamiento, plazos de copias, precio y condiciones). Requieren revisión de un profesional antes de operar. Además, la política de privacidad debe reflejar el estado real de OpenRouter y sus proveedores.
+4. **Sin prueba gratuita ni cobro** (Etapa 7).
+5. **Correo de Supabase por defecto**: configurar SMTP propio.
+6. Sin invitación de usuarios a una agencia; sin eliminar leads/propiedades individualmente; sin paginación más allá de 100; sin visitas (Etapa 6); sin captcha en el alta.
 
 ## Siguiente paso recomendado
-1. Ejecutar migraciones y tests en Supabase y probar el flujo completo en móvil y ordenador.
-2. Añadir importación CSV y páginas legales mínimas.
-3. Decidir sobre la IA (Etapa 5) y la prueba gratuita (Etapa 7) antes de salir al mercado.
+1. Ejecutar migraciones y tests en Supabase, desplegar con las variables de `vercel.env.template` y recorrer el flujo en móvil y ordenador.
+2. Hacer 3–5 demos acompañadas con datos propios del agente (ver `docs/validacion-demo.md`).
+3. Con la señal de interés: revisión jurídica, Etapa 7 (prueba y cobro) y modelo de IA de pago.

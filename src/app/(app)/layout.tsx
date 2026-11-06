@@ -16,6 +16,8 @@ const NAV = [
   { href: "/leads", label: "Leads" },
   { href: "/pipeline", label: "Pipeline" },
   { href: "/propiedades", label: "Propiedades" },
+  { href: "/importar", label: "Importar" },
+  { href: "/analizador", label: "Analizador" },
   { href: "/ajustes", label: "Ajustes" },
 ];
 
@@ -49,6 +51,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </nav>
       </header>
       <div className="mx-auto max-w-6xl p-4">{children}</div>
+      <footer className="mx-auto max-w-6xl px-4 pb-6 text-xs text-neutral-500">
+        <Link href="/privacidad" className="underline">Privacidad</Link> · <Link href="/terminos" className="underline">Términos</Link> · <Link href="/cookies" className="underline">Cookies</Link> · <Link href="/dpa" className="underline">Encargo de tratamiento</Link>
+      </footer>
     </div>
   );
 }

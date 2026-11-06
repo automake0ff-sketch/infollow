@@ -39,6 +39,9 @@ export default function LoginPage() {
         <Link href="/forgot-password" className="underline">¿Olvidaste tu contraseña?</Link>
         <Link href="/register" className="underline">Crear cuenta</Link>
       </div>
+      <p className="text-xs text-neutral-500">
+        <Link href="/privacidad" className="underline">Privacidad</Link> · <Link href="/terminos" className="underline">Términos</Link> · <Link href="/cookies" className="underline">Cookies</Link>
+      </p>
     </main>
   );
 }

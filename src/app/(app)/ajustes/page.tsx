@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/auth";
 import { WEIGHTS } from "@/lib/weights";
-import { updateSettings } from "./actions";
+import { deleteAgency, updateSettings } from "./actions";
 
 const input = "w-24 rounded-lg border bg-white p-2 text-sm";
 
@@ -46,6 +46,18 @@ export default async function AjustesPage({ searchParams }: { searchParams: Prom
         </section>
         <button className="rounded-lg bg-black px-4 py-2 text-sm text-white">Guardar ajustes</button>
       </form>
+
+      <section className="space-y-3 rounded-xl border bg-white p-4">
+        <h2 className="font-semibold">Privacidad y datos</h2>
+        <p className="text-sm text-neutral-600">Ejerce tus derechos de portabilidad y supresión. Solo el propietario de la agencia puede hacerlo.</p>
+        <a href="/api/export" className="inline-block rounded-lg border px-4 py-2 text-sm">Exportar todos los datos (JSON)</a>
+        <form action={deleteAgency} className="space-y-2 rounded-lg border border-red-200 bg-red-50 p-3">
+          <p className="text-sm font-medium text-red-800">Eliminar la agencia y todos sus datos</p>
+          <p className="text-xs text-red-700">Se borran de forma permanente contactos, propiedades, historial y cuentas de acceso. No se puede deshacer. Exporta tus datos antes.</p>
+          <input name="confirm" required placeholder="Escribe el nombre exacto de tu agencia" className="w-full rounded-lg border bg-white p-2 text-sm" />
+          <button className="rounded-lg bg-red-700 px-4 py-2 text-sm text-white">Eliminar definitivamente</button>
+        </form>
+      </section>
     </main>
   );
 }

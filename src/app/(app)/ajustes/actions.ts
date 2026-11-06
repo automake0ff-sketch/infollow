@@ -35,3 +35,16 @@ export async function updateSettings(f: FormData) {
   revalidatePath("/atencion");
   redirect("/ajustes?saved=1");
 }
+
+export async function deleteAgency(f: FormData) {
+  const { supabase } = await requireUser();
+  const confirm = String(f.get("confirm") ?? "");
+  const { error } = await supabase.rpc("delete_my_agency", { p_confirm: confirm });
+  if (error) {
+    const msg = error.message.includes("confirmación") ? "El nombre escrito no coincide con el de la agencia."
+      : error.message.includes("propietario") ? "Solo el propietario puede eliminar la agencia." : "No se pudo eliminar la agencia.";
+    redirect(`/ajustes?error=${encodeURIComponent(msg)}`);
+  }
+  try { await supabase.auth.signOut(); } catch { /* la cuenta ya no existe */ }
+  redirect("/login");
+}

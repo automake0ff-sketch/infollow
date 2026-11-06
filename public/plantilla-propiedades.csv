@@ -1,0 +1,3 @@
+referencia,tipo,operacion,precio,direccion,zona,habitaciones,banos,superficie,descripcion,caracteristicas,estado
+TRI-001,Piso,venta,230000,Calle Ejemplo 12,Triana,3,2,95,Luminoso y reformado,Terraza;Ascensor,disponible
+NER-014,Piso,alquiler,950,Avenida Ejemplo 5,Nervión,2,1,70,,Amueblado,disponible

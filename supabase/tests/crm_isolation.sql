@@ -1,8 +1,8 @@
 -- Aislamiento del CRM entre agencias (requiere 0001 y 0002). Solo en proyecto de DESARROLLO. Todo se revierte.
 begin;
 insert into auth.users (id, email, raw_user_meta_data) values
-  ('00000000-0000-0000-0000-0000000000a1', 'a@test.local', '{"agency_name":"Agencia A"}'),
-  ('00000000-0000-0000-0000-0000000000b1', 'b@test.local', '{"agency_name":"Agencia B"}');
+  ('00000000-0000-0000-0000-0000000000a1', 'a@test.local', '{"agency_name":"Agencia A","accepted_terms":"true"}'),
+  ('00000000-0000-0000-0000-0000000000b1', 'b@test.local', '{"agency_name":"Agencia B","accepted_terms":"true"}');
 
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000b1","role":"authenticated"}', true);

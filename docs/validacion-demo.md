@@ -3,14 +3,15 @@
 ## Hipótesis a validar
 Los agentes independientes y las agencias pequeñas pierden oportunidades por falta de seguimiento y pagarían 19,90–24,90 €/mes por una herramienta que les diga cada mañana a quién atender.
 
-## Qué se puede enseñar hoy (Etapas 1–3)
+## Qué se puede enseñar hoy (Etapas 1–5 parcialmente)
 1. Registro y creación de la agencia (1 minuto).
-2. Alta de 2–3 leads y 2 propiedades reales del propio agente.
+2. **Importar su cartera desde su CSV/Excel** (o dictar 2–3 contactos reales) y alguna propiedad.
 3. Asociar propiedades a leads y registrar una llamada.
 4. **Tu día comercial**: seguimientos vencidos, de hoy, leads sin próximo paso y contactos inactivos.
 5. Crear, completar y posponer un seguimiento.
+6. En una ficha: generar un mensaje con IA, editarlo, copiarlo y registrarlo como enviado; y pegar una conversación real en el Analizador.
 
-Aún NO existe: IA (mensajes, análisis), visitas, priorización explicada, suscripción ni prueba de 3 días. No prometerlas en la demo como si estuvieran.
+Aún NO existe: visitas, suscripción ni prueba gratuita. La IA gratuita tiene 50 usos al día en total: no hagas demos simultáneas a muchas personas. No prometas lo que no está.
 
 ## Guion de demo (5–7 minutos)
 1. Pregunta de apertura: "¿Cómo decides hoy a quién llamar primero?"

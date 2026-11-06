@@ -2,8 +2,8 @@
 -- Todo se revierte al final (rollback). Si algo falla, lanza una excepción.
 begin;
 insert into auth.users (id, email, raw_user_meta_data) values
-  ('00000000-0000-0000-0000-0000000000a1', 'a@test.local', '{"agency_name":"Agencia A","full_name":"Ana"}'),
-  ('00000000-0000-0000-0000-0000000000b1', 'b@test.local', '{"agency_name":"Agencia B","full_name":"Beto"}');
+  ('00000000-0000-0000-0000-0000000000a1', 'a@test.local', '{"agency_name":"Agencia A","accepted_terms":"true","full_name":"Ana"}'),
+  ('00000000-0000-0000-0000-0000000000b1', 'b@test.local', '{"agency_name":"Agencia B","accepted_terms":"true","full_name":"Beto"}');
 
 do $$ begin
   if (select count(*) from public.pipeline_stages where agency_id in (select agency_id from public.profiles where id in

@@ -6,6 +6,9 @@ import { fmtDate, fmtDateTime, fmtMoney } from "@/lib/form";
 import { uuid } from "@/lib/schemas";
 import LeadForm from "../LeadForm";
 import TaskRow from "../../tareas/TaskRow";
+import AiMessageCard, { type AiItem } from "../AiMessageCard";
+import { assistantAction, generateMessage } from "../ai-actions";
+import { ASSISTANT_KINDS, SCENARIOS } from "@/lib/ai/prompts";
 import { createTask } from "../../tareas/actions";
 import { addActivity, changeStage, linkProperty, unlinkProperty, updateLead } from "../actions";
 
@@ -34,6 +37,11 @@ export default async function LeadPage({
     supabase.from("tasks").select("id, lead_id, title, due_at").eq("lead_id", id).eq("status", "pendiente").order("due_at"),
   ]);
 
+  const [{ data: aiRows }, { data: quotaRows }] = await Promise.all([
+    supabase.from("ai_messages").select("id, kind, scenario, status, content, model, created_at").eq("lead_id", id).order("created_at", { ascending: false }).limit(8),
+    supabase.rpc("ai_quota"),
+  ]);
+  const quota = (Array.isArray(quotaRows) ? quotaRows[0] : quotaRows) as { used: number; daily_limit: number } | null;
   const { data: prio } = await supabase.from("v_lead_priority").select("score, level, reasons").eq("lead_id", id).maybeSingle();
   const prioReasons = (prio?.reasons ?? []) as { rule: string; reason: string }[];
   const stageLabel = Object.fromEntries((stages ?? []).map((s) => [s.key, s.label]));
@@ -67,6 +75,54 @@ export default async function LeadPage({
             <button className="rounded-lg border px-3 text-sm">Cambiar</button>
           </form>
           <p className="mt-2 text-xs text-neutral-500">El estado solo cambia cuando tú lo decides.</p>
+        </section>
+
+        <section id="asistente" className="rounded-xl border bg-white p-4">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-semibold">Asistente comercial</h2>
+            {quota && <span className="text-xs text-neutral-500">Usos de IA hoy: {quota.used}/{quota.daily_limit}</span>}
+          </div>
+          <p className="mb-3 text-xs text-neutral-500">
+            La IA solo ve los datos de esta ficha (sin teléfono, email ni apellidos). Sugiere; no envía nada ni cambia estados.
+          </p>
+          <div className="mb-3 flex flex-wrap gap-2">
+            {(Object.keys(ASSISTANT_KINDS) as (keyof typeof ASSISTANT_KINDS)[]).map((k) => (
+              <form key={k} action={assistantAction}>
+                <input type="hidden" name="lead_id" value={id} />
+                <input type="hidden" name="kind" value={k} />
+                <button className="rounded-lg border px-3 py-1.5 text-xs">{ASSISTANT_KINDS[k].label}</button>
+              </form>
+            ))}
+          </div>
+          <form action={generateMessage} className="mb-4 grid gap-2 rounded-lg bg-neutral-50 p-3 sm:grid-cols-2">
+            <input type="hidden" name="lead_id" value={id} />
+            <label className="grid gap-1 text-xs">Generar mensaje para…
+              <select name="scenario" defaultValue="primer_contacto" className={input}>
+                {Object.entries(SCENARIOS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+              </select>
+            </label>
+            <label className="grid gap-1 text-xs">Tono
+              <select name="tone" defaultValue="cercano" className={input}>
+                <option value="cercano">Cercano</option>
+                <option value="profesional">Profesional</option>
+                <option value="directo">Directo</option>
+              </select>
+            </label>
+            <label className="grid gap-1 text-xs sm:col-span-2">Indicaciones (opcional, p. ej. horarios que tú propones)
+              <input name="extra" maxLength={300} className={input} />
+            </label>
+            <div className="sm:col-span-2"><button className="rounded-lg bg-black px-4 py-2 text-sm text-white">Generar con IA</button></div>
+          </form>
+          {(aiRows ?? []).length === 0 ? (
+            <p className="text-sm text-neutral-600">Aún no has generado nada para este lead.</p>
+          ) : (
+            <ul className="space-y-3">
+              {(aiRows as AiItem[]).map((m) => (
+                <AiMessageCard key={m.id} item={m} when={fmtDateTime(m.created_at)}
+                  title={m.kind === "mensaje" ? `Mensaje · ${SCENARIOS[m.scenario as keyof typeof SCENARIOS] ?? "personalizado"}` : ASSISTANT_KINDS[m.kind as keyof typeof ASSISTANT_KINDS]?.label ?? m.kind} />
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="rounded-xl border bg-white p-4">
