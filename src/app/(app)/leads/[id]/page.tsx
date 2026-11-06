@@ -5,6 +5,8 @@ import { ACTIVITY_LABELS, MANUAL_ACTIVITY_TYPES } from "@/lib/constants";
 import { fmtDate, fmtDateTime, fmtMoney } from "@/lib/form";
 import { uuid } from "@/lib/schemas";
 import LeadForm from "../LeadForm";
+import TaskRow from "../../tareas/TaskRow";
+import { createTask } from "../../tareas/actions";
 import { addActivity, changeStage, linkProperty, unlinkProperty, updateLead } from "../actions";
 
 const input = "w-full rounded-lg border bg-white p-2.5 text-sm";
@@ -24,11 +26,12 @@ export default async function LeadPage({
   const { data: lead } = await supabase.from("leads").select("*").eq("id", id).maybeSingle();
   if (!lead) notFound();
 
-  const [{ data: stages }, { data: activities }, { data: links }, { data: props }] = await Promise.all([
+  const [{ data: stages }, { data: activities }, { data: links }, { data: props }, { data: tasks }] = await Promise.all([
     supabase.from("pipeline_stages").select("key,label").order("position"),
     supabase.from("activities").select("id, type, content, metadata, property_id, occurred_at").eq("lead_id", id).order("occurred_at", { ascending: false }).limit(100),
     supabase.from("lead_properties").select("property_id").eq("lead_id", id),
     supabase.from("properties").select("id, reference, address, zone, price, status").order("reference").limit(500),
+    supabase.from("tasks").select("id, lead_id, title, due_at").eq("lead_id", id).eq("status", "pendiente").order("due_at"),
   ]);
 
   const stageLabel = Object.fromEntries((stages ?? []).map((s) => [s.key, s.label]));
@@ -65,6 +68,24 @@ export default async function LeadPage({
         </section>
 
         <section className="rounded-xl border bg-white p-4">
+          <h2 className="mb-3 font-semibold">Seguimientos</h2>
+          {(tasks ?? []).length === 0 ? (
+            <p className="mb-3 text-sm text-neutral-600">Sin seguimientos pendientes: este lead no tiene próximo paso.</p>
+          ) : (
+            <ul className="mb-3 divide-y rounded-lg border">
+              {(tasks ?? []).map((t) => <TaskRow key={t.id} task={t} back={`/leads/${id}`} showLead={false} />)}
+            </ul>
+          )}
+          <form action={createTask} className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+            <input type="hidden" name="lead_id" value={id} />
+            <input type="hidden" name="back" value={`/leads/${id}`} />
+            <input name="title" required maxLength={200} placeholder="Ej. Llamar para proponer visita" className={input} />
+            <input name="due" type="date" required className={input} />
+            <button className="rounded-lg bg-black px-4 py-2 text-sm text-white">Programar</button>
+          </form>
+        </section>
+
+        <section id="actividad" className="rounded-xl border bg-white p-4">
           <h2 className="mb-3 font-semibold">Registrar actividad</h2>
           <form action={addActivity} className="grid gap-2">
             <input type="hidden" name="lead_id" value={id} />
