@@ -10,16 +10,19 @@ async function logout() {
   redirect("/login");
 }
 
-const NAV = [
-  { href: "/hoy", label: "Hoy" },
-  { href: "/atencion", label: "Atención" },
-  { href: "/leads", label: "Leads" },
-  { href: "/pipeline", label: "Pipeline" },
-  { href: "/propiedades", label: "Propiedades" },
-  { href: "/importar", label: "Importar" },
-  { href: "/analizador", label: "Analizador" },
-  { href: "/ajustes", label: "Ajustes" },
+// Modo demo sencillo (por defecto): solo lo esencial. Pon NEXT_PUBLIC_SIMPLE_DEMO=false para ver todo el menú.
+const SIMPLE = process.env.NEXT_PUBLIC_SIMPLE_DEMO !== "false";
+const ALL_NAV = [
+  { href: "/hoy", label: "Hoy", simple: true },
+  { href: "/atencion", label: "Atención", simple: false },
+  { href: "/leads", label: "Leads", simple: true },
+  { href: "/pipeline", label: "Pipeline", simple: false },
+  { href: "/propiedades", label: "Propiedades", simple: false },
+  { href: "/importar", label: "Importar", simple: true },
+  { href: "/analizador", label: "Analizador", simple: false },
+  { href: "/ajustes", label: "Ajustes", simple: true },
 ];
+const NAV = ALL_NAV.filter((n) => !SIMPLE || n.simple);
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { supabase, user } = await requireUser();

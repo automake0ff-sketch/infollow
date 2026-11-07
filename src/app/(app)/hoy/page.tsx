@@ -60,22 +60,42 @@ export default async function HoyPage({ searchParams }: { searchParams: Promise<
       {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
       {nothingAtAll && (
-        <section className="rounded-xl border border-dashed bg-white p-8 text-center">
-          <p className="font-medium">Todavía no hay nada que atender.</p>
-          <p className="mx-auto mt-1 max-w-md text-sm text-neutral-600">
-            Crea tus primeros leads y programa un seguimiento para cada uno: aquí aparecerá lo vencido, lo de hoy y los contactos que se enfrían.
-          </p>
-          <div className="mt-4 flex justify-center gap-2">
-            <Link href="/leads/new" className="rounded-lg bg-black px-4 py-2 text-sm text-white">Nuevo lead</Link>
-            <Link href="/propiedades/new" className="rounded-lg border px-4 py-2 text-sm">Nueva propiedad</Link>
-          </div>
+        <section className="rounded-xl border bg-white p-5">
+          <h2 className="text-lg font-semibold">Empieza en 3 pasos</h2>
+          <p className="mt-1 text-sm text-neutral-600">En unos minutos verás aquí a quién tienes que llamar hoy.</p>
+          <ol className="mt-4 space-y-3 text-sm">
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-black text-xs text-white">1</span>
+              <div>
+                <p className="font-medium">Trae tus contactos</p>
+                <p className="text-neutral-600">Importa tu hoja de Excel/CSV o crea uno a mano.</p>
+                <div className="mt-2 flex gap-2">
+                  <Link href="/importar" className="rounded-lg bg-black px-3 py-1.5 text-xs text-white">Importar CSV</Link>
+                  <Link href="/leads/new" className="rounded-lg border px-3 py-1.5 text-xs">Crear un contacto</Link>
+                </div>
+              </div>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-xs">2</span>
+              <div>
+                <p className="font-medium">Mira “Tu día comercial”</p>
+                <p className="text-neutral-600">Esta pantalla te dirá a quién atender primero y por qué: seguimientos vencidos, contactos que se enfrían, oportunidades sin próximo paso.</p>
+              </div>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-xs">3</span>
+              <div>
+                <p className="font-medium">Genera un mensaje con IA</p>
+                <p className="text-neutral-600">Abre cualquier contacto, pulsa “Generar con IA”, edítalo y cópialo para enviarlo desde tu WhatsApp o email.</p>
+              </div>
+            </li>
+          </ol>
         </section>
       )}
 
       {prioItems.length > 0 && (
         <Section title="A quién atender primero" hint="Ordenado por prioridad de atención según reglas claras; no es una probabilidad de cierre. Cada alerta explica su motivo." count={prioItems.length}>
           <PriorityList items={prioItems} names={prioNames} back="/hoy" />
-          <Link href="/atencion" className="mt-2 inline-block text-sm underline">Ver todas las oportunidades que necesitan atención</Link>
         </Section>
       )}
 
